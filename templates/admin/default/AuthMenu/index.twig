@@ -1,0 +1,355 @@
+{% extends "Common/iframe_common.twig" %}
+{% block container %}
+<div class="wrapper wrapper-content">
+    <div class="row">
+           <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>权限列表</h5>
+                    </div>
+                    <div class="ibox-content container-fluid">
+                      <form id="addMenuForm">
+                            <div class="row col-md-12">
+                                <div class="col-md-2 form-group">
+                                    <label for="search-username">父级菜单：</label>
+                                        <select class="form-control" name="pid">
+                                        <option value="0">--顶级菜单--</option>
+                                            {% autoescape true %}  
+                                                {{menus|raw}}
+                                            {% endautoescape %}
+                                        </select>
+                                </div>
+        
+                                <div class="col-md-2 form-group">
+                                    <label>菜单名称：</label>
+                                    <input type="text" name="name" placeholder="请输入菜单名称" class="form-control">
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label>菜单控制器：</label>
+                                    <input type="text" name="class" placeholder="请输入控制名称" class="form-control">
+                                </div>
+                                <div class="col-md-2 form-group">
+                                    <label>菜单方法：</label>
+                                    <input type="text" name="method" placeholder="以逗号分隔方法" class="form-control">
+                                </div>
+                                <div class="col-md-2 form-group">
+                                    <label>Icon：</label>
+                                    <input type="text" name="icon" placeholder="Icon" class="form-control">
+                                </div>
+                                {% if checkAuth('AuthMenu','add',uid) %}
+                                    <div class="col-md-1 form-group">
+                                        <span style="margin-top: 22px;" href="javascript:void(0);" class="btn btn-primary add-field" id="addMenu"><i class="fa fa-plus"></i>&nbsp;&nbsp;添加菜单</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% if checkAuth('AuthMenu','order',uid) %}
+                                <div class="row col-md-12">
+                                    <div class="col-md-2 form-group">
+                                        <span class="btn btn-primary add-field" id="rule-order-btn">排序</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </form>
+                        <form id="rule-order" name="rule-order">
+                        <div class="table-responsive col-md-12">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                            <tr>                                 
+                                        <th width="7%">                                       
+                                            <label class="checkbox-inline i-checks">
+                                                <div class="icheckbox_square-green">
+                                                    <input type="checkbox" class="message-check-all" />
+                                                </div> 全选
+                                            </label>
+                                        </th>  
+                                            <th>排序</th>
+                                            <th>id</th>
+                                            <th>菜单名称</th>
+                                            <th>控制器</th>
+                                            <th>方法</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                </thead>
+                                <tbody>
+                                    {% autoescape true %}  
+                                        {{tr|raw}}
+                                    {% endautoescape %}
+                                </tbody>
+                            </table>
+                        {% if checkAuth('AuthMenu','del',uid) %}
+                            <div class="delete-checked btn btn-xs btn-danger hide">批量删除</div>
+                        {% endif %}
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>
+<!-- 编辑菜单模态框 -->
+<div class="modal fade" id="edit_menu" tabindex="-1" role="dialog" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title">编辑菜单</h4>
+         </div>
+         <div class="modal-body">
+            <form class="form-horizontal" id="form-edit-menu" autocomplete="off">
+
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">菜单名称：</label>
+                    <div class="col-lg-8">
+                        <input type="text" class="form-control" required="true" name="name" id="name">
+                        <input type="hidden" name="menuid" id="menuid">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">控制器：</label>
+                    <div class="col-lg-8">
+                        <input type="text" class="form-control" required="true" name="class" id="class">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">方法：</label>
+                    <div class="col-lg-8">
+                        <input type="text" class="form-control" required="true" name="method" id="method">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">状态：</label>
+                    <div class="col-sm-8">
+                        <select class="form-control m-b" id="status">
+                            <option value="1">yes</option>
+                            <option value="0">no</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">icon：</label>
+                    <div class="col-lg-8">
+                        <input type="text" class="form-control" required="true" name="icon" id="icon">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">选择层级：</label>
+                    <div class="col-sm-8">
+                        <select class="form-control m-b" name="pid" id="menus">
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-5 col-sm-offset-3">
+                        <span class="btn btn-primary" id="save_menu">保存</span>
+                        <button type="button" class="btn btn-default col-sm-offset-1" data-dismiss="modal">取消</button>
+                    </div>
+                </div>
+            </form>
+         </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+    $(document).ready(function(){
+    　　$(".delete-btn").click(function(){
+    　　　　var id = $(this).data('val');
+            del_menu(id);
+    　　});
+        initCheckbox();
+        $(".edit-btn").click(function(){
+            var id = $(this).data('val');
+            $.ajax({
+                type:"POST",
+                url:"{{base_url('admin/AuthMenu/ajaxGetMenu')}}",
+                data:{id:id},
+                dataType:"json",
+                success:function(data){
+                    if(data.status=='1'){
+                        $('#menus').html(data.data['menus']);
+                        $('#menus').find("option[value='"+data.data['info']['parent']+"']").attr("selected",true);
+                        $('#status').find("option[value='"+parseInt(data.data['info']['status'])+"']").attr("selected",true);
+                        $('#name').val(data.data['info']['name']);
+                        $('#menuid').val(data.data['info']['id']);
+                        $('#method').val(data.data['info']['method']);
+                        $('#class').val(data.data['info']['class']);
+                        $('#icon').val(data.data['info']['icon']);
+                    }else{
+                        layer.msg(data.message,{icon: 2});
+                    }
+                }
+            })
+            $('#edit_menu').modal('show');
+        })
+
+        //编辑保存菜单
+        $('#save_menu').click(function(){
+            id = $('#menuid').val();
+            status = $('#status').val();
+            method = $('#method').val();
+            parent = $('#menus').val();
+            class_name = $('#class').val();
+            name = $('#name').val();
+            icon = $('#icon').val();
+            $.ajax({
+                type:"POST",
+                url:"{{base_url('admin/AuthMenu/edit')}}",
+                data:{id:id,status:status,parent:parent,name:name,class:class_name,method:method,icon:icon},
+                dataType:"json",
+                success:function(data){
+                    if(data.status=='1'){
+                        layer.msg(data.message,{icon: 1});
+                        window.location.reload(true);
+                        layer.close();
+                    }else{
+                        layer.msg(data.message,{icon: 2});
+                    }
+                }
+            })
+        })
+
+        function del_menu(id){
+             layer.confirm('你确定删除此菜单？', {icon: 3, title:'确定删除菜单'}, function(index){
+                $.ajax({
+                    type:"POST",
+                    url:"{{base_url('admin/AuthMenu/del')}}",
+                    data:{id:id},
+                    dataType:"json",
+                    success:function(data){
+                        if(data.status=='1'){
+                            layer.msg(data.message,{icon: 1});
+                            window.location.reload(true);
+                            layer.close(index);
+                        }else{
+                            layer.msg(data.message,{icon: 2});
+                        }
+                    }
+                })
+             })
+        }
+
+        $('#rule-order-btn').click(function(){
+            $.ajax({
+             type: "POST",
+             url: "{{base_url('admin/AuthMenu/order')}}",
+             data: $('#rule-order').serialize(),
+             dataType: "json",
+             success: function(data){
+                if(data.status=='1'){
+                    layer.msg(data.message,{icon: 1});
+                    window.location.reload();
+                }else{
+                    layer.msg(data.message,{icon: 2});
+                }
+             }})
+        })
+
+        $('#addMenu').click(function(){
+            var data = $('#addMenuForm');
+            add_menu(data);
+        })
+
+        function add_menu(data){
+            var name = data.find('input[name=name]').val();
+            if(!name){
+                layer.msg('菜单名称不能为空',{icon: 2});
+            }else{
+
+                layer.confirm('你确定添加此菜单', {icon: 3, title:'确定添加菜单'}, function(index){
+                    $.ajax({
+                        type:"POST",
+                        url:"{{base_url('admin/AuthMenu/add')}}",
+                        data:data.serialize(),
+                        dataType:"json",
+                        success:function(data){
+                            // console.log(data);
+                            if(data.status=='1'){
+                                layer.msg(data.message,{icon: 1});
+                                window.location.reload(true);
+                                layer.close(index);
+                            }else{
+                                layer.msg(data.message,{icon: 2});
+                            }
+                        }
+                    })
+                })
+            }
+        }
+
+        $(document).on('click','.delete-checked',function(e){
+            var $this = $(this);
+            layer.alert("确认删除",{
+                shadeClose:1,
+                btn:['确认','取消'],
+                yes:function(){
+                    var id = [];
+                     $('.message-check-one:checked').each(function(index, el) {
+                         id.push($(this).val());
+                     });
+                    $.ajax({
+                        url: '{{base_url("admin/AuthMenu/del")}}',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {'id': id},
+                        timeout:4000,
+                        beforeSend:function(){
+                            layer.load(2);
+                        }
+                    })
+                    .done(function(e) {
+                        if (e.status!=1) {
+                            common.ajaxError(e);
+                            return false;
+                        }
+                        layer.closeAll();
+                        window.location.reload();
+                        parent.layer.msg(e.message,{
+                            icon:1
+                        });                
+
+                    })
+                    .fail(function(e) {
+                        common.ajaxError(e)
+                    })
+                    .always(function() {
+                        layer.closeAll('loading');
+                    });
+                    
+                }
+            })
+        })
+
+        function initCheckbox(){
+            $(".i-checks").iCheck({
+                checkboxClass:"icheckbox_square-green",
+                radioClass:"iradio_square-green",
+            });
+            $('.message-check-all').on('ifChanged', function(event) {
+                if($(this).prop('checked')){
+                    $('.message-check-one').iCheck('check')
+                }else{
+                    $('.message-check-one').iCheck('uncheck');
+                }   
+                
+            });  
+            $('.message-check-one').on('ifChanged', function(event) {
+                if ($('.message-check-one:checked').length>1) {
+                    $('.delete-checked').removeClass('hide')
+                } else {
+                    $('.delete-checked').addClass('hide')
+
+                }
+            });                                 
+        } 
+
+    })
+</script>
+{% endblock %}
+
+
+
+

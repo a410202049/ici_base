@@ -1,0 +1,310 @@
+{% extends "Common/iframe_common.twig" %}
+{% block container %}
+<link rel="stylesheet" type="text/css" href="{{base_url('public/admin/css/plugins/summernote/summernote.css')}}">
+<link rel="stylesheet" type="text/css" href="{{base_url('public/admin/css/plugins/summernote/summernote-bs3.css')}}">
+<link rel="stylesheet" type="text/css" href="{{base_url('public/admin/js/plugins/layer/laydate/skins/molv/laydate.css')}}">
+<link rel="stylesheet" type="text/css" href="{{base_url('public/admin/css/plugins/webuploader/webuploader.css')}}">
+<style>
+    .tags-container .btn.active{
+        background-color: #1ab394;
+        border-color: #1ab394;
+        color: #FFF        
+    }
+    .photo{ width: 150px;height: 150px; }
+    .photo img{
+        width: 100%;
+        height: 100%;
+    }
+    .btn.btn-info.up_img{
+        float: left;
+        margin-top: 50px;
+    }
+
+    .file-item.thumbnail{
+        margin-bottom: 0px;
+    }
+    .webuploader-pick,.webuploader-pick-hover{
+        padding: 0px;
+        background: #fff;
+        display: block;
+    }
+</style>
+<div class="wrapper">
+    <div class="row">
+        <div class="col-sm-12">
+                <div id="tab-basic" class="tab-pane active"> 
+                   <div class="panel-body">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-content container-fluid">
+
+                                <div class="row">
+                                    <div class="form-group col-sm-3 must">
+                                        <label for="">文章分类</label>
+                                        <select name="cid" id="cid" class="form-control">
+                                            <option value="-1">无分类</option>
+                                            {% for item in categorys %}
+                                                <option value="{{item.id}}" {% if article.cid == item.id %}selected="selected"{% endif %}>{{item.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-3">
+                                        <label for="none">发布时间</label>
+                                        <input type="text" name="publish" id="add-publish" class="form-control layer-date" value="{{article.publishtime}}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-sm-2">
+                                        <label for="none">封面图</label>
+                                        <div  id="filePicker">
+                                            <input type="hidden" class="form-control form-data" id="photo" value="{{article.cover_img}}" />
+                                            <div id="fileList" class="uploader-list">
+                                                <img style="height:100%;width:100%;" src="{% if article.cover_img %}{{base_url(article.cover_img)}}{% else %}{{base_url('public/admin/img/timg.jpg')}}{% endif %}" >
+                                            </div>
+                                        </div>                             
+                                    </div>
+                                </div>
+                                  <div class="form-group must">
+                                        <label for="none">文章标题</label>
+                                        <input id="title" class="form-control form-data" data-name="title" value="{{article.title}}" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="none">文章摘要</label>
+                                        <textarea id="description" rows='5' class="form-control form-data" data-name="description">{{article.description}}</textarea>
+                                    </div>
+                                    <div class="form-group must">
+                                    <label for="none">文章内容</label>
+                                        <div class="form-control editor form-data" data-name="content" >{{article.content|raw}}</div>
+                                    </div>
+
+                                      <div class="form-group must">
+                                        <label for="none">文章关键词</label>
+                                        <select class="form-control" style="width:100%" id="keywords" multiple=multiple>
+
+                                        </select>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-sm-1">
+                                            <label class="control-label">开启评论：</label>
+                                            <div class="btn-switcher {% if article.is_comment %}active{% endif %}" id="is_comment">
+                                            <span></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-sm-1">
+                                            <label class="control-label">是否置顶：</label>
+                                            <div class="btn-switcher {% if article.is_top %}active{% endif %}" id="is_top">
+                                            <span></span>
+                                            </div>
+                                        </div>
+                                     </div>
+                                    <div class="row">
+                                        <div class="form-group col-sm-1">
+                                            <label for="none">浏览量</label>
+                                            <input name="hit_num" id="hit_num" class="form-control" type="text" value="{{article.hit_num}}">
+                                        </div>
+                                        <div class="form-group col-sm-3">
+                                            <label for="none">发布来源</label>
+                                            <input name="release_source" id="release_source" class="form-control" type="text" value="{{article.release_source}}">
+                                        </div>
+                                    </div>
+
+             
+   
+                            </div>
+                        </div>
+                   </div>
+                </div> 
+        <div class="form-group mt-20 fixed-bottom">
+            <button class="btn btn-success" type="button" id="edit-article" data-id="{{article.id}}">
+                提交
+            </button>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script src="{{base_url('public/admin/js/plugins/summernote/summernote.min.js')}}"></script>    
+<script src="{{base_url('public/admin/js/plugins/summernote/lang/summernote-zh-CN.js')}}"></script>    
+<script src="{{base_url('public/admin/js/plugins/layer/laydate/laydate.js')}}"></script>    
+<script src="{{base_url('public/admin/js/plugins/webuploader/webuploader.min.js')}}"></script>  
+<script>
+
+jQuery(document).ready(function($) {
+    $("#keywords").select2({
+      ajax: {
+        url: "{{base_url('admin/Tags/getTagsJson')}}",
+        type:'GET',
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return {
+            "tagName": params.term, // search term
+          };
+        },
+        processResults: function (data, params) {
+          return {
+            results:data.data,
+          }
+        },
+        cache: false
+      },
+    initSelection: function(element, callback) { // 初始化时设置默认值  
+        var data = [];
+        {% for tag in article.tags %}
+            data.push({id: "{{tag.id}}", name: "{{tag.name}}"});
+        {% endfor %}
+        callback(data);
+    },
+      escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+      minimumInputLength: 1,
+      templateResult:function(re){
+        if(re.loading) return "Loading..."
+        return ('<strong>'+re.name+'</strong>')
+      },
+      templateSelection:function(re){
+        return(re.name)
+      }
+    });
+
+    var SWF_URL = '{{base_url("public/admin/js/plugins/webuploader/Uploader.swf")}}';
+    var SERVER_URL = "{{base_url('admin/Index/upload?folder=article')}}"+'&size=200*200';
+    var base_url = "{{base_url()}}";
+    laydate({
+         elem: '#add-publish',
+         format: 'YYYY-MM-DD hh:mm:ss',
+         max:common.getDate(),
+         istime:true
+    })
+
+    $('.editor').summernote({
+        minHeight: 300,
+        callbacks:{
+            onImageUpload: function(files, editor, welEditable) {
+            },
+            onPaste:function(e){
+                console.log(e.originalEvent.clipboardData.getData("url"))
+            }
+            
+        }
+    });
+    $(document).on('summernote.image.upload', '.editor', function(we,files) {
+        var data = new FormData();
+        $this = $(this)
+        data.append("file", files[0]);
+        $.ajax({
+            data: data,
+            type: "POST",
+            url: "{{base_url('admin/Index/upload?folder=article')}}",
+            cache: false,
+            contentType: false,
+            processData: false,
+        })
+        .done(function(e) {
+            var e = JSON.parse(e)
+            if (e.status!=1) {
+                common.ajaxError(e);
+                return false;
+            }    
+            $this.summernote('insertImage', base_url+e.data.url);            
+        })
+        .fail(function() {
+            common.ajaxError(e);
+            
+        })      
+    });
+    
+    var uploader = WebUploader.create({
+        auto: true,
+        compress:false,
+        crop: true,
+        width:110,
+        height:110,
+        swf: SWF_URL,
+        server: SERVER_URL,
+        pick: '#filePicker',
+        accept: {
+            title: 'Images',
+            extensions: 'gif,jpg,jpeg,bmp,png',
+            mimeTypes: 'image/jpg,image/jpeg,image/png'
+        }
+    });
+    uploader.on('uploadSuccess',function( file,res ) {
+        if(res.status!="1"){
+            layer.msg(res.message);
+            return false;
+        }
+        var $li = $(
+                '<div id="' + file.id + '" class="file-item thumbnail">' +
+                    '<img>' +
+                '</div>'
+                ),
+        $img = $li.find('img');
+        $("#fileList").empty().append( $li );
+        uploader.makeThumb( file, function( error, src ) {
+            if ( error ) {
+                $img.replaceWith('<span>不能预览</span>');
+                return;
+            }
+            $img.attr( 'src', base_url+res.data.cut_img );
+            $("#photo").val(res.data.cut_img);
+        }, '100%', "auto" );    
+    });
+    uploader.on('startUpload',function(){
+        layer.load(1, {
+          shade: [0.1,'#fff'] //0.1透明度的白色背景
+        });
+    })
+    uploader.on('uploadFinished',function(){
+        layer.closeAll();
+    })
+    
+        $(document).on("click", "#edit-article", function(){
+           var data = {
+                id:$(this).data('id'),
+                cid:$("#cid").val(),
+                publishtime:$('#add-publish').val(),
+                cover_img:$('#photo').val(),
+                title:$('#title').val(),
+                description:$('#description').val(),
+                tags:$('#keywords').val(),
+                is_comment:$("#is_comment").hasClass('active')?1:0,
+                is_top:$("#is_top").hasClass('active')?1:0,
+                hit_num:$('#hit_num').val(),
+                release_source:$('#release_source').val(),
+                content:$('.editor').summernote('code').replace("script","p")
+           }
+
+           $.ajax({
+                url: '{{base_url("admin/Article/edit")}}',
+                type: 'POST',
+                dataType: 'json',
+                timeout:14000,
+                data: data
+                ,
+                beforeSend:function(){
+                    layer.load(2);
+                }
+           })
+           .done(function(e) {
+                if (e.status!=1) {
+                    common.ajaxError(e);
+                    return false;
+                }
+                layer.closeAll();
+                parent.window.location.reload(true);
+                parent.layer.msg(e.message,{
+                    icon:1
+                });
+           })
+           .fail(function(e) {
+                common.ajaxError(e)
+           })
+           .always(function() {
+                layer.closeAll('loading');
+           });
+           
+        });
+});
+</script>
+
+{% endblock %}

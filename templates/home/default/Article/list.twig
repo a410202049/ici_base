@@ -1,0 +1,99 @@
+{% extends "Common/common.twig" %}
+{% block container %}
+<section class="container">
+  <div class="content-wrap">
+    <div class="content" id="content">
+{#       {% if page_index == '1'%}
+        {% for article in tops.articles %}
+
+        {% endfor %}
+      {% endif %} #}
+      {% for article in articles.articles %}
+          {% if page_index == '1' %}
+              {% if loop.index <= 2 and article.is_top == '1' %}
+                <article class="excerpt-minic excerpt-minic-index">
+                      <h2><span class="red">【置顶】</span><a class="pjax" target="_self" href="{{base_url('detail/'~article.id)}}" title="{{article.title}}">{{article.title}}</a>
+                      </h2>
+                      <p class="note">{{article.description}}</p>
+                </article>
+              {% else %}
+                  <article class="excerpt excerpt-3 {% if not article.cover_img %}excerpt_no_pic{% endif %}" style="">
+                        {% if article.cover_img %}
+                          <a class="pjax focus" href="{{base_url('detail/'~article.id)}}" title="{{article.title}}" target="_self" ><img class="thumb"  src="{{base_url(article.cover_img)}}" alt="{{article.title}}"  style="display: inline;"></a>
+                        {% endif %}
+                        <header><a class="pjax cat" href="{{base_url('category/'~article.cid)}}" title="{{article.cname}}" >{{article.cname}}<i></i></a>
+                            <h2><a class="pjax" href="{{base_url('detail/'~article.id)}}" title="{{article.title}}" target="_self" >{{article.title}}</a>
+                            </h2>
+                        </header>
+                        <p class="meta">
+                            <time class="time"><i class="glyphicon glyphicon-time"></i> {% if article.publishtime %}{{article.publishtime|slice(0,10)}}{% else %}{{article.createtime|slice(0,10)}}{% endif %}</time>
+                            <span class="views"><i class="glyphicon glyphicon-eye-open"></i> {% if article.hit_num %}{{article.hit_num}}{% else %}{{article.real_hit_num}}{% endif %}</span>
+                             {# <a class="comment" href="##comment" title="评论" target="_self" ><i class="glyphicon glyphicon-comment"></i> 0</a> #}
+                        </p>
+                        <p class="note">{{article.description}}</p>
+                    </article>
+              {% endif %}
+          {% else %}
+              <article class="excerpt excerpt-3 {% if not article.cover_img %}excerpt_no_pic{% endif %}" style="">
+                    {% if article.cover_img %}
+                      <a class="pjax focus" href="{{base_url('detail/'~article.id)}}" title="{{article.title}}" target="_self" ><img class="thumb"  src="{{base_url(article.cover_img)}}" alt="{{article.title}}"  style="display: inline;"></a>
+                    {% endif %}
+                    <header><a class="pjax cat" href="{{base_url('category/'~article.cid)}}" title="{{article.cname}}" >{{article.cname}}<i></i></a>
+                        <h2><a class="pjax" href="{{base_url('detail/'~article.id)}}" title="{{article.title}}" target="_self" >{{article.title}}</a>
+                        </h2>
+                    </header>
+                    <p class="meta">
+                        <time class="time"><i class="glyphicon glyphicon-time"></i> {% if article.publishtime %}{{article.publishtime|slice(0,10)}}{% else %}{{article.createtime|slice(0,10)}}{% endif %}</time>
+                        <span class="views"><i class="glyphicon glyphicon-eye-open"></i> {% if article.hit_num %}{{article.hit_num}}{% else %}{{article.real_hit_num}}{% endif %}</span>
+                         {# <a class="comment" href="##comment" title="评论" target="_self" ><i class="glyphicon glyphicon-comment"></i> 0</a> #}
+                    </p>
+                    <p class="note">{{article.description}}</p>
+                </article>
+          {% endif %}
+
+      {% endfor %}
+      {{articles.pager|raw}}
+    </div>
+  </div>
+  <aside class="sidebar">
+    <div class="widget widget_search">
+      <form class="navbar-form" action="{{base_url('search')}}/1" method="get">
+        <div class="input-group">
+          <input type="text" name="keyword" class="form-control" size="35" placeholder="请输入关键字" maxlength="15" autocomplete="off">
+          <span class="input-group-btn">
+          <button class="btn btn-default btn-search" type="submit">搜索</button>
+          </span> </div>
+      </form>
+    </div>
+    <div class="widget widget_hot">
+          <h3>热门文章</h3>
+          <ul>   
+            {% for article in hots.articles %}         
+                <li><a title="{{article.title}}" href="{{base_url('detail/'~article.id)}}" ><span class="thumbnail">
+                      <img class="thumb" src="{{base_url(article.cover_img)}}" alt="{{article.title}}"  style="display: block;">
+                  </span><span class="text">{{article.title}}</span><span class="muted"><i class="glyphicon glyphicon-time"></i>
+                      {% if article.publishtime %}{{article.publishtime|slice(0,10)}}{% else %}{{article.createtime|slice(0,10)}}{% endif %}
+                  </span><span class="muted"><i class="glyphicon glyphicon-eye-open"></i> {% if article.hit_num %}{{article.hit_num}}{% else %}{{article.real_hit_num}}{% endif %}</span></a>
+                </li> 
+            {% endfor %} 
+          </ul>
+     </div>
+     <div class="widget widget_sentence">
+      <h3>文章归档</h3> 
+        <ol class="field">
+           {% for y in ym %}   
+          <li><a href="{{base_url('article/date/'~y.ym)}}">{{y.ymtime}}({{y.num}})</a></li>
+          {% endfor %} 
+        </ol>
+     </div>
+    <div class="widget widget_sentence">
+      <h3>友情链接</h3>
+      <div class="widget-sentence-link">
+         {% for link in links %}  
+          <a href="{{link.url}}" title="网站建设" target="_self" >{{link.name}}</a>&nbsp;&nbsp;&nbsp;
+         {% endfor %} 
+      </div>
+    </div>
+  </aside>
+</section>
+{% endblock %}

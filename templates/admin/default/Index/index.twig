@@ -1,0 +1,161 @@
+{% extends "Common/common.twig" %}
+{% block container %}
+    <div id="wrapper">
+        <!--左侧导航开始-->
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="nav-close"><i class="fa fa-times-circle"></i>
+            </div>
+            <div class="sidebar-collapse">
+                <ul class="nav" id="side-menu">
+                    <li class="nav-header">
+                        <div class="dropdown profile-element">
+                            <span><img alt="image" style="max-width: 140px;" class="" src="{{base_url('public/admin/img/logo.png')}}" /></span>
+
+                        </div>
+                        <div class="logo-element">
+                            E
+                        </div>
+                    </li>
+
+                    {% for item in userMenu %}
+                        <li>
+                            <a title="{{item.name}}" href="{% if item.class %}{{base_url('admin/'~item.class)}}{% else %}javascript:void(0);{% endif %}" {% if not item['child'] %}class="J_menuItem"{% endif %}><i class="{{item.icon}}"></i> <span class="nav-label">{{item.name}}</span> <span class="fa {% if item['child'] %}arrow {% else %} circle {% endif %}"></span></a>
+                            {% if item['child'] %}
+                                <ul class="nav nav-second-level collapse">
+                                    {% for sub in item.child %}
+                                        <li >
+                                            <a title="{{sub.name}}"  class="J_menuItem" href="{{base_url('admin/'~sub.class)}}">
+                                                {% if sub.icon %}
+                                                    <i class="{{sub.icon}}"></i>
+                                                {% endif %}{{sub.name}}
+                                            </a>
+                                            {% if sub.child %}
+                                                <ul class="nav nav-third-level collapse">
+                                                    {% for s in sub.child %}
+                                                        <li >
+                                                            <a title="{{s.name}}"  class="J_menuItem" href="{{base_url('admin/'~s.class)}}">
+                                                                {% if s.icon %}
+                                                                    <i class="{{s.icon}}"></i>
+                                                                {% endif %}{{s.name}}
+                                                            </a>
+                                                        </li>
+                                                    {% endfor %}                    
+                                                </ul>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}                    
+                                </ul>
+                            {% endif %}
+                        </li>
+                     {% endfor %}
+                </ul>
+            </div>
+        </nav>
+        <!--左侧导航结束-->
+        <!--右侧部分开始-->
+        <div id="page-wrapper" class="gray-bg dashbard-1">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header row">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#">
+                            <i class="fa fa-bars"></i>
+                        </a>
+                        <h2 class="text-success" style="display: inline-block;"></h2>  
+                        
+                        <a class="minimalize-styl-2 btn btn-success" target="_blank" title="主页" href="{{base_url()}}">
+                            <i class="fa fa-home"></i>&nbsp;
+                            {{site.sitename}}
+                        </a> 
+                        <a class="minimalize-styl-2 btn btn-info" title="" href="#">
+                            <i class="fa fa-users"></i>&nbsp;
+                            {{userInfo.group_name}}
+                        </a>                                                
+                    </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li class="dropdown">
+                                <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#" aria-expanded="true">
+                                    <i class="fa fa-bell"></i> <span class="label label-primary">8</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-alerts">
+                                    <li>
+                                        <a href="mailbox.html">
+                                            <div>
+                                                <i class="fa fa-envelope fa-fw"></i> 您有16条未读消息
+                                                <span class="pull-right text-muted small">4分钟前</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a href="profile.html">
+                                            <div>
+                                                <i class="fa fa-qq fa-fw"></i> 3条新回复
+                                                <span class="pull-right text-muted small">12分钟钱</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <div class="text-center link-block">
+                                            <a class="J_menuItem" href="notifications.html" data-index="89">
+                                                <strong>查看所有 </strong>
+                                                <i class="fa fa-angle-right"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                </ul>
+                        </li>                             
+                   
+                        <li  class="dropdown">
+                            <a data-toggle="dropdown" class="">
+                                <span class="hidden-xs">{{userInfo.username}}<b class="caret"></b></span>
+                                <span class="visible-xs"><i class="fa fa-user"></i></span>
+                                
+                            </a>
+                            <ul class="dropdown-menu m-t-xs">
+                                <li><a title="站点设置" class="J_menuItem" href="{{base_url('admin/SiteSeting')}}/#tab-contact">设置</a>
+                                </li>
+                                <li class="divider"></li>
+                                <li><a href="{{base_url('admin/Login/logout')}}">退出</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="row content-tabs">
+                <button class="roll-nav roll-left J_tabLeft"><i class="fa fa-backward"></i>
+                </button>
+                <nav class="page-tabs J_menuTabs">
+                    <div class="page-tabs-content">
+                        <a href="javascript:;" class="active J_menuTab" data-type="home" data-id="{{base_url('admin/System')}}">系统主页</a>
+                    </div>
+                </nav>
+                <button class="roll-nav roll-right J_tabRight"><i class="fa fa-forward"></i>
+                </button>
+                <div class="btn-group roll-nav roll-right">
+                    <button class="dropdown J_tabClose" data-toggle="dropdown">关闭选项<span class="caret"></span>
+                    </button>
+                    <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                        <li class="J_tabCloseAll"><a>关闭所有</a>
+                        </li>
+                        <li class="J_tabCloseOther"><a>关闭其它</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row J_mainContent" id="content-main">
+                <iframe class="J_iframe" name="iframe0" width="100%" height="100%" src="{{base_url('admin/System')}}" frameborder="0" data-id="{{base_url('admin/System')}}"></iframe>
+            </div>
+            <div class="footer">
+                <div class="pull-right">&copy; 2014-2016 <a href="http://www.eptonic.com/" target="_blank">Eptonic</a>
+                </div>
+            </div>
+        </div>
+        <!--右侧部分结束-->
+    </div>
+
+{% endblock %}
+{% block script %}
+    <script src="{{base_url('public/admin/js/index.js')}}"></script>
+{% endblock %}

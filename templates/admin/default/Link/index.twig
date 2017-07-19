@@ -1,0 +1,482 @@
+{% extends "Common/iframe_common.twig" %}
+{% block container %}
+    <div class="wrapper wrapper-content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-content container-fluid">
+                    	<form action="{{base_url('admin/UserManage/index/1')}}">
+	                        <div class="row col-md-12">
+	                        	<div class="col-md-3 form-group">
+	                        		<label for="search-username">链接类型</label>
+	                        		<select id="linkType" class="form-control" name="linkType">
+	                                    {% if categorys %}
+		                        			{% for category in categorys %}
+		                        			    <option value="{{category.id}}" {% if category.id == tid %}selected{% endif %}>{{category.name}}</option>
+	                                        {% endfor %}
+										{% else %}
+											'<option value="0">请选择一个类型</option>'+
+										{% endif %}
+	                        		</select>
+	                        	</div>
+
+	                            <div class="col-md-3 form-group">
+	                            	<label for="null" class="center-block">&nbsp;</label>
+	    							{% if checkAuth('Link','add',uid) %}
+	    								<button type="button" class="btn btn-primary add-link"><i class="fa fa-plus"></i>&nbsp;添加链接
+	    							</button>
+	    							{% endif %}
+
+	                            </div>
+	                        </div>
+	                        {% if checkAuth('Link','order',uid) %}
+	                        <div class="row col-md-12">
+                                <div class="col-md-2 form-group">
+                                    <span class="btn btn-primary add-field" id="order-btn">排序</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </form>
+                        <div class="table-responsive col-md-12">
+                        	<form id="order-form" name="order-form">
+	                            <table class="table table-striped table-hover">
+	                                <thead>
+	                                    <tr>
+	                                    	<th width="7%">
+	                                            <label class="checkbox-inline i-checks">
+	                                                <div class="icheckbox_square-green">
+	                                                    <input type="checkbox" class="message-check-all" />
+	                                                </div> 全选
+	                                            </label>
+	                                        </th>
+	                                        <th>排序</th>
+	                                    	<th>链接类型</th>
+	                                        <th>链接名称</th>
+	                                        <th>链接状态</th>
+	                                        <th>操作</th>
+	                                    </tr>
+	                                </thead>
+	                                <tbody>
+	                                    {% autoescape true %}
+	                                        {{tr|raw}}
+	                                    {% endautoescape %}
+	                                </tbody>
+	                            </table>
+                        	</form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        $(document).ready(function(){
+        	initCheckbox();
+        	$('.add-link').click(function(){
+        		layer.open({
+				  type: 1,
+				  closeBtn:2,
+				  title:'添加用户',
+				  shadeClose: true, //开启遮罩关闭
+				  area: ['600px', 'auto'],
+				  content:
+				  '<div class="ibox-content">'+
+				  '<form class="form-horizontal">'+
+
+			            '<div class="form-group">'+
+			                '<label class="col-sm-3 control-label">链接类型:</label>'+
+			             	'<div class="col-sm-8">'+
+								'<select class="form-control" id="add-linkType">'+
+                                    {% if categorys %}
+	                        			{% for category in categorys %}
+	                        			    '<option value="{{category.id}}">{{category.name}}</option>'+
+                                        {% endfor %}
+									{% else %}
+										'<option value="0">请选择一个类型</option>'+
+									{% endif %}
+								'</select>'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group">'+
+			                '<label class="col-sm-3 control-label">父级链接:</label>'+
+			             	'<div class="col-sm-8">'+
+								'<select class="form-control" id="add-parent-link">'+
+									'<option value="0">顶级链接</option>'+
+								'</select>'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group must">'+
+			            '<label class="col-sm-3 control-label">链接名称:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" class="form-control" id="add-linkName" placeholder="链接名称">'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group must">'+
+			            '<label class="col-sm-3 control-label">url:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" class="form-control" id="add-url" placeholder="url">'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group must">'+
+			            '<label class="col-sm-3 control-label">关键词:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" id="add-keywords" class="form-control" placeholder="关键词">'+
+			                '</div>'+
+			            '</div>'+
+
+   			            '<div class="form-group must">'+
+			            '<label class="col-sm-3 control-label">描述:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" id="add-description" class="form-control" placeholder="描述">'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group">'+
+			                '<label class="col-sm-3 control-label">打开方式:</label>'+
+			             	'<div class="col-sm-8">'+
+								'<select class="form-control" id="add-openType">'+
+									'<option value="_self">当前窗口</option>'+
+									'<option value="_blank">新窗口</option>'+
+								'</select>'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group">'+
+			                '<div class="col-sm-offset-3 col-sm-8">'+
+			                    '<span class="btn btn-primary" id="add-link-btn">添加</span>'+
+			                '</div>'+
+			            '</div>'+
+		        	'</form></div>',
+				});
+        		if($('#add-linkType').val()){
+				   $.ajax({
+					   	url: '{{base_url("admin/Link/getLinks")}}',
+					   	type: 'POST',
+					   	dataType: 'json',
+					   	data:{typeId:$('#add-linkType').val()},
+					   	beforeSend:function(){
+					   		layer.load(2);
+					   	},
+					   	success:function(data){
+
+					   		$('#add-parent-link').html(data.data);
+					   		layer.closeAll('loading');
+					   	}
+			   		})
+        		}
+        	})
+
+
+        	$(document).on('click','.edit-btn',function(){
+        		var $this = $(this);
+        		var id = $(this).data('val');
+
+			   $.ajax({
+				   	url: '{{base_url("admin/Link/getLink")}}',
+				   	type: 'POST',
+				   	dataType: 'json',
+				   	timeout:4000,
+				   	data:{id:id},
+				   	beforeSend:function(){
+				   		layer.load(2);
+				   	}
+			   })
+        		.then(function(data){
+        			data= data.data;
+	        		domHTML='<div class="ibox-content">'+
+				  '<form class="form-horizontal">'+
+
+			            '<div class="form-group">'+
+			                '<label class="col-sm-3 control-label">链接类型:</label>'+
+			             	'<div class="col-sm-8">'+
+								'<select class="form-control" id="edit-linkType">'+
+                                    {% if categorys %}
+	                        			{% for category in categorys %}
+	                        			    '<option value="{{category.id}}">{{category.name}}</option>'+
+                                        {% endfor %}
+									{% else %}
+										'<option value="0">请选择一个类型</option>'+
+									{% endif %}
+								'</select>'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group">'+
+			                '<label class="col-sm-3 control-label">父级链接:</label>'+
+			             	'<div class="col-sm-8">'+
+								'<select class="form-control" id="edit-parent-link">'+
+									'<option value="0">顶级链接</option>'+
+								'</select>'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group must">'+
+			            '<label class="col-sm-3 control-label">链接名称:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" class="form-control" id="edit-linkName" placeholder="链接名称">'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group must">'+
+			            '<label class="col-sm-3 control-label">url:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" class="form-control" id="edit-url" placeholder="url">'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group">'+
+			            '<label class="col-sm-3 control-label">路由地址:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" id="edit-router" class="form-control" placeholder="路由地址">'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group must">'+
+			            '<label class="col-sm-3 control-label">关键词:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" id="edit-keywords" class="form-control" placeholder="关键词">'+
+			                '</div>'+
+			            '</div>'+
+
+   			            '<div class="form-group must">'+
+			            '<label class="col-sm-3 control-label">描述:</label>'+
+			             	'<div class="col-sm-8">'+
+			                    '<input type="text" autocomplete="off" id="edit-description" class="form-control" placeholder="描述">'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group">'+
+			                '<label class="col-sm-3 control-label">打开方式:</label>'+
+			             	'<div class="col-sm-8">'+
+								'<select class="form-control" id="edit-openType">'+
+									'<option value="_self">当前窗口</option>'+
+									'<option value="_blank">新窗口</option>'+
+								'</select>'+
+			                '</div>'+
+			            '</div>'+
+
+			            '<div class="form-group">'+
+			                '<div class="col-sm-offset-3 col-sm-8">'+
+			                    '<span class="btn btn-primary" id="edit-link-btn">编辑</span>'+
+			                '</div>'+
+			            '</div>'+
+		        	'</form></div>',
+
+							layer.open({
+							  type: 1,
+							  closeBtn:2,
+							  title:'编辑链接',
+							  shadeClose: true, //开启遮罩关闭
+							  area: ['600px', 'auto'],
+							  content:domHTML,
+							  success:function(){
+							  	layer.closeAll('loading');
+							  }
+							});
+
+						   $.ajax({
+							   	url: '{{base_url("admin/Link/getLinks")}}',
+							   	type: 'POST',
+							   	dataType: 'json',
+							   	async: false,
+							   	data:{typeId:data.tid,id:data.id},
+							   	beforeSend:function(){
+							   		layer.load(2);
+							   	},
+							   	success:function(data){
+							   		$('#edit-parent-link').html(data.data);
+							   		layer.closeAll('loading');
+							   	}
+					   		})
+
+							$("#edit-linkType").val(data.tid).trigger('change');
+							$("#edit-parent-link").val(data.pid);
+							$('#edit-linkName').val(data.name);
+							$('#edit-openType').val(data.target);
+							$('#edit-url').val(data.url);
+							$('#edit-router').val(data.router_url);
+							$('#edit-keywords').val(data.keywords);
+							$('#edit-description').val(data.description);
+							$('#edit-link-btn').attr("data-id",id);
+
+
+        		})
+        	})
+
+			$('#linkType').on("change",function(){
+				$v = $(this).val();
+				window.location.href = "?tid="+$v;
+			})
+
+			// $(document).on("change" ,"#edit-linkType",function(){
+			//    $.ajax({
+			// 	   	url: '{{base_url("admin/Link/getLinks")}}',
+			// 	   	type: 'POST',
+			// 	   	dataType: 'json',
+			// 	   	async: false,
+			// 	   	data:{typeId:$(this).val()},
+			// 	   	beforeSend:function(){
+			// 	   		layer.load(2);
+			// 	   	},
+			// 	   	success:function(data){
+			// 	   		$('#edit-parent-link').html(data.data);
+			// 	   		layer.closeAll('loading');
+			// 	   	}
+		 //   		})
+			// })
+
+			$(document).on("change" ,"#add-linkType",function(){
+			   $.ajax({
+				   	url: '{{base_url("admin/Link/getLinks")}}',
+				   	type: 'POST',
+				   	dataType: 'json',
+				   	data:{typeId:$(this).val()},
+				   	beforeSend:function(){
+				   		layer.load(2);
+				   	},
+				   	success:function(data){
+				   		$('#add-parent-link').html(data.data);
+				   		layer.closeAll('loading');
+				   	}
+		   		})
+			})
+
+
+			$(document).on("click" ,"#add-link-btn",function(){
+				data = {
+					'name':$('#add-linkName').val(),
+					'tid':$('#add-linkType').val(),
+					'pid':$('#add-parent-link').val(),
+					'target':$('#add-openType').val(),
+					'url':$('#add-url').val(),
+					'router_url':$('#add-router').val(),
+					'keywords':$('#add-keywords').val(),
+					'description':$('#add-description').val()
+				}
+			   $.ajax({
+				   	url: '{{base_url("admin/Link/add")}}',
+				   	type: 'POST',
+				   	dataType: 'json',
+				   	data:data,
+				   	beforeSend:function(){
+				   		layer.load(2);
+				   	},
+				   	success:function(data){
+                        if(data.status=='1'){
+                            layer.msg(data.message,{icon: 1});
+                            window.location.reload(true);
+                        }else{
+                            layer.msg(data.message,{icon: 2});
+                            layer.closeAll('loading');
+                        }
+				   	}
+		   		})
+			})
+
+			$(document).on("click" ,"#edit-link-btn",function(){
+				data = {
+					'id':$(this).data('id'),
+					'name':$('#edit-linkName').val(),
+					'tid':$('#edit-linkType').val(),
+					'pid':$('#edit-parent-link').val(),
+					'target':$('#edit-openType').val(),
+					'url':$('#edit-url').val(),
+					'router_url':$('#edit-router').val(),
+					'keywords':$('#edit-keywords').val(),
+					'description':$('#edit-description').val()
+				}
+			   $.ajax({
+				   	url: '{{base_url("admin/Link/edit")}}',
+				   	type: 'POST',
+				   	dataType: 'json',
+				   	data:data,
+				   	beforeSend:function(){
+				   		layer.load(2);
+				   	},
+				   	success:function(data){
+                        if(data.status=='1'){
+                            layer.msg(data.message,{icon: 1});
+                            window.location.reload(true);
+                        }else{
+                            layer.msg(data.message,{icon: 2});
+                            layer.closeAll('loading');
+                        }
+				   	}
+		   		})
+			})
+
+
+        $('#order-btn').click(function(){
+            $.ajax({
+             type: "POST",
+             url: "{{base_url('admin/Link/order')}}",
+             data: $('#order-form').serialize(),
+             dataType: "json",
+             success: function(data){
+                if(data.status=='1'){
+                    layer.msg(data.message,{icon: 1});
+                    window.location.reload();
+                }else{
+                    layer.msg(data.message,{icon: 2});
+                }
+             }})
+        })
+
+    　　$(".delete-btn").click(function(){
+    　　　　var id = $(this).data('val');
+            layer.confirm('你确定删除此链接？', {icon: 3, title:'确定删除链接'}, function(index){
+            $.ajax({
+                type:"POST",
+                url:"{{base_url('admin/Link/del')}}",
+                data:{id:id},
+                dataType:"json",
+                success:function(data){
+                    if(data.status=='1'){
+                        layer.msg(data.message,{icon: 1});
+                        window.location.reload(true);
+                        layer.close(index);
+                    }else{
+                        layer.msg(data.message,{icon: 2});
+                    }
+                }
+            })
+         })
+    　　});
+
+        function initCheckbox(){
+            $(".i-checks").iCheck({
+                checkboxClass:"icheckbox_square-green",
+                radioClass:"iradio_square-green",
+            });
+            $('.message-check-all').on('ifChanged', function(event) {
+                if($(this).prop('checked')){
+                    $('.message-check-one').iCheck('check')
+                }else{
+                    $('.message-check-one').iCheck('uncheck');
+                }
+
+            });
+            $('.message-check-one').on('ifChanged', function(event) {
+                if ($('.message-check-one:checked').length>1) {
+                    $('.delete-checked').removeClass('hide')
+                } else {
+                    $('.delete-checked').addClass('hide')
+
+                }
+            });
+        }
+
+
+    	});
+
+
+
+    </script>
+{% endblock %}

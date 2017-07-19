@@ -1,0 +1,446 @@
+{% extends "Common/iframe_common.twig" %}
+{% block container %}
+<style src="base_url('public/admin/css/plugins/treeview/bootstrap-treeview.css')">
+</style>
+<style>
+	 .treeview .list-group-item{cursor:pointer}.treeview span.indent{margin-left:10px;margin-right:10px}.treeview span.icon{width:12px;margin-right:5px}.treeview .node-disabled{color:silver;cursor:not-allowed}.node-treeview-checkable{}.node-treeview-checkable:not(.node-disabled):hover{background-color:#F5F5F5;} 
+</style>
+    <div class="wrapper wrapper-content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+
+                    <div class="ibox-content container-fluid">
+                    	<form action="{{base_url('admin/GroupManage/index/1')}}">
+	                        <div class="row col-md-12">
+	                        	<div class="col-md-3 form-group">
+	                        		<label for="search-username">角色名称</label>
+	                        		<input type="text" class="form-control" name="role_keywords" id="role_keywords" value="">
+	                        	</div>
+	                            <div class="col-md-3 form-group">
+	                            	<label for="null" class="center-block">&nbsp;</label>
+	                            	<button type="submit" class="btn btn-primary" id="search-btn"><i class="fa fa-search"></i>&nbsp;搜索</button>
+									{% if checkAuth('GroupManage','add',uid) %}
+	    								<button type="button" class="btn btn-primary add-role"><i class="fa fa-plus"></i>&nbsp;添加
+	    							</button>
+									{% endif %}
+	                            </div>
+	                        </div>
+                        </form>
+                        <div class="table-responsive col-md-12">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>                                     
+                                        <th>角色名称</th>
+                                        <th>角色描述</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+								{% for group in groupData %}
+	                                <tr>
+	                                	<td>{{group.name}}</td>
+	                                	<td>
+	                                		
+	                                		<span class="tooltip-content" data-toggle="tooltip" data-original-title="{{group.description}}" data-placement="bottom">{{group.description|slice(0,15)}}</span>
+	                                	</td>
+	                                	<td>
+	                                		{% if group.status == 1 %}
+	                                		<label class="label label-primary">激活</label>
+	                                		{% elseif group.status == 0  %}
+	                                		<label class="label label-danger">禁用</label>
+	                                		{% endif %}
+	                            		</td>	
+	                                	<td>{{group.create_time}}</td>	
+	                                	<td>
+	                                		{% if checkAuth('GroupManage','isEnable',uid) %}
+		                                		{% if group.status == 1 %}
+			                                		<a href="javascript:void(0)" class="btn btn-sm btn-danger status-btn" data-id="{{group.id}}" title="禁用">
+			                                			<i class="fa fa-times"></i>	
+		                                			</a>
+		                                		{% elseif group.status == 0  %}
+			                                		<a href="javascript:void(0)" class="btn btn-sm btn-primary status-btn" data-id="{{group.id}}" title="激活">
+			                                			<i class="fa fa-check"></i>	
+		                                			</a>
+		                                		{% endif %}
+	                                		{% endif %}
+											
+											{% if checkAuth('GroupManage','grant',uid) %}
+	                                			<a href="javascript:void(0)" class="btn btn-sm btn-success auth-list" data-id="{{group.id}}" title="权限列表"><i class="fa fa-list"></i></a>
+	                                		{% endif %}
+											
+											{% if checkAuth('GroupManage','edit',uid) %}
+	                                			<a href="javascript:void(0)" class="btn btn-sm btn-primary edit-role" data-id="{{group.id}}" title="编辑"><i class="fa fa-edit"></i></a>
+											{% endif %}
+											
+											{% if checkAuth('GroupManage','del',uid) %}
+	                                			<a href="javascript:void(0)" class="btn btn-sm btn-danger delete-btn" data-id="{{group.id}}"><i class="fa fa-trash"></i></a>
+	                                		{% endif %}
+
+	                                	</td>
+	                                </tr>
+								{% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="fixed-table-pagination col-md-12">
+                        	<div class="pull-left pagination-detail">
+                        		<span class="pagination-info">共<strong>{{pager.total}}</strong>条记录 &nbsp;<strong>{{pager.nowindex}}/{{pager.totalpage}}</strong>页</span>
+                    		</div>
+                            {% autoescape true %}  
+                             {{pager.show(1)|raw }}
+                            {% endautoescape %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+<script src="{{base_url('public/admin/js/plugins/treeview/bootstrap-treeview.js')}}"></script>
+<script>
+	$(document).on('click', '.message-check-all', function(event) {
+        $(".message-check-one").prop("checked", $(this).prop("checked"));
+	})
+
+	jQuery(document).ready(function($) {
+		$('.tooltip-content').tooltip();
+		$('.add-role').click(function(){
+    		layer.open({
+			  type: 1,
+			  closeBtn:2,
+			  title:'添加角色',
+			  shadeClose: true, //开启遮罩关闭
+			  area: ['600px', 'auto'],
+			  content: 
+			  '<div class="ibox-content">'+
+			  '<form class="form-horizontal">'+
+		            '<div class="form-group must">'+
+		            '<label class="col-sm-3 control-label">角色名称:</label>'+
+		             	'<div class="col-sm-8">'+
+		                    '<input type="text" autocomplete="off" class="form-control" id="add-rolename" placeholder="">'+
+		                '</div>'+
+		            '</div>'+
+		            '<div class="form-group must">'+
+		            '<label class="col-sm-3 control-label">角色描述:</label>'+
+		             	'<div class="col-sm-8">'+
+		                    '<textarea type="text" rows="4" autocomplete="off" id="add-description" class="form-control" placeholder=""></textarea>'+
+		                '</div>'+
+		            '</div>'+           
+		            '<div class="form-group">'+
+		                '<div class="col-sm-offset-3 col-sm-8">'+
+		                    '<span class="btn btn-primary" id="add-role">添加</span>'+
+		                '</div>'+
+		            '</div>'+
+	        	'</form></div>',
+	        	success:function(){
+								
+	        	}
+			});
+
+    	});
+    	$('.edit-role').click(function(){
+    		var $this = $(this);
+    		var role;
+    		$.ajax({
+    			url: '{{base_url("admin/GroupManage/getRoleInfo")}}',
+    			type: 'POST',
+    			dataType: 'json',
+    			data: {rid: $this.data('id')},
+    			timeout:4000,
+    			async:false
+    		})
+    		.done(function(data) {
+    			if(data.status==1){
+    				role = (data.data)
+    			}else{
+    				common.ajaxError(data)
+    			}
+
+    		})
+    		.fail(function(e) {
+    			common.ajaxError(e);
+    		})
+			layer.open({
+			  type: 1,
+			  closeBtn:2,
+			  title:'编辑角色',
+			  shadeClose: true, //开启遮罩关闭
+			  area: ['600px', 'auto'],
+			  content:'<div class="ibox-content">'+
+			  '<form class="form-horizontal">'+
+		            '<div class="form-group must">'+
+		            '<label class="col-sm-3 control-label">角色名称:</label>'+
+		             	'<div class="col-sm-8">'+
+		                    '<input type="text" value="'+role.name+'" autocomplete="off" class="form-control" id="edit-rolename" placeholder="">'+
+		                '</div>'+
+		            '</div>'+
+		            '<div class="form-group must">'+
+		            '<label class="col-sm-3 control-label">角色描述:</label>'+
+		             	'<div class="col-sm-8">'+
+		                    '<textarea type="text" rows="4" autocomplete="off" id="edit-description" class="form-control" placeholder="">'+role.description+'</textarea>'+
+		                '</div>'+
+		            '</div>'+           
+		            '<div class="form-group">'+
+		                '<div class="col-sm-offset-3 col-sm-8">'+
+		                    '<span class="btn btn-primary" data-id="'+role.id+'" id="edit-role">编辑</span>'+
+		                '</div>'+
+		            '</div>'+
+	        	'</form></div>',
+			});
+    	});
+
+	 	var nbsp = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		function role_tree(table,icon_str = '') {	
+		    tree = '';
+		    var number=1;
+		    for (key in table){
+		    	checked = table[key]['active'] == '1' ? 'checked="checked"':' ' ;
+		    	tree+='<tr><td><input name="checked['+table[key]['id']+']" value="'+table[key]['id']+'" type="checkbox" class="message-check-one" '+checked+' /></td>';
+		    	tree+='<td>'+icon_str+table[key]['name']+'</td>';
+		    	tree+='<td>';
+		    	for(k in table[key]['method']){
+		    		childChecked = table[key]['method'][k]['active'] == '1' ? 'checked="checked"':' ' ;
+		    		tree+='<input name="checked['+table[key]['id']+'][]" value="'+table[key]['method'][k]['name']+'" type="checkbox" class="message-check-method" '+childChecked+'/> '+table[key]['method'][k]['name']+'&nbsp;&nbsp;&nbsp;&nbsp;';
+		    	}
+		    	tree+='</td></tr>';
+		    	if(table[key]['child']){
+		    		k = '';
+					if(number==table[key]['child'].length){
+						icon_str= icon_str ? nbsp : '';
+					}
+		    		tree+=role_tree(table[key]['child'],icon_str+nbsp);
+		    		number++;
+		    	}
+		    }
+		    return tree;        
+		}
+
+    	$(document).on('click', '.auth-list', function(event) {
+    		event.preventDefault();
+    		var id = $(this).attr('data-id');
+    		var defaultData;
+    		$.ajax({
+    			url: '{{base_url("admin/GroupManage/getAuthList")}}',
+    			type: 'POST',
+    			dataType: 'json',
+    			async:false,
+    			data: {rid:id },
+    			timeout:4000,
+    			beforeSend:function(){
+    				layer.load(2);
+    			}
+    		})
+    		.done(function(e) {
+    			if (e.status!=1) {
+		   			common.ajaxError(e);
+		   			return false;
+		   		}
+    			defaultData = e.data;
+    		})
+			.fail(function(e) {
+				common.ajaxError(e)
+			})
+			.always(function() {
+				layer.closeAll('loading');
+			});
+    		
+
+    		var tableStr = '<table class="table table-striped table-hover">';
+    		tableStr+='<thead><tr><th width="14%">';
+    		tableStr+='<input type="checkbox" class="message-check-all" />';
+    		tableStr+=' 全选</th><th>方法</th><th>功能</th></tr></thead>';
+    		tableStr+='<tbody>';
+
+    		tableStr+= role_tree(defaultData);
+
+
+
+    		tableStr+='</tbody></table><div class="form-group text-center fixed-bottom"><button class="btn btn-primary" data-id="'+id+'" id="edit-auth">提交</button></div>';
+
+    		
+          
+			layer.open({
+			  type: 1,
+			  closeBtn:2,
+			  title:'授权',
+			  shadeClose: true, //开启遮罩关闭
+			  area: ['700px', '85%'],
+			  content:tableStr,
+			  success:function(){
+
+
+
+			  }
+			})
+    	});
+
+
+
+		$(document).on('click', '#edit-auth', function(event) {
+			event.preventDefault();
+			
+			var id = $(this).data('id')
+			var auth = [];
+			var data = [];
+			// var check_boxes = $("input[type=checkbox][class!=message-check-all]").prop("checked",true).serialize();
+			var check_boxes = $('input[type=checkbox]:checked').serialize();
+			$.ajax({
+				url: '{{base_url("admin/GroupManage/grant")}}',
+				type: 'POST',
+				dataType: 'json',
+				data:check_boxes+'&groupid='+id,
+				beforeSend:function(){
+					layer.load(2)
+				}
+			})
+    		.done(function(e) {
+    			if (e.status!=1) {
+		   			common.ajaxError(e);
+		   			return false;
+		   		}
+		   		layer.closeAll();
+		   		layer.msg(e.message,{icon:1,time:1500})
+		   		
+    		})
+			.fail(function(e) {
+				common.ajaxError(e)
+			})
+			.always(function() {
+				layer.closeAll('loading');
+			});
+			
+		});
+		$(document).on("click", "#add-role", function(){
+		   var data = {
+		   		rolename:$("#add-rolename").val(),
+		   		description:$('#add-description').val(),
+		   }
+		   $.ajax({
+			   	url: '{{base_url("admin/GroupManage/add")}}',
+			   	type: 'POST',
+			   	dataType: 'json',
+			   	timeout:4000,
+			   	data: data,
+			   	beforeSend:function(){
+			   		layer.load(2);
+			   	}
+		   })
+		   .done(function(e) {
+		   		if (e.status!=1) {
+		   			common.ajaxError(e);
+		   			return false;
+		   		}
+		   		layer.closeAll();
+		   		window.location.reload();
+		   		parent.layer.msg(e.message,{
+		   			icon:1
+		   		});
+		   })
+		   .fail(function(e) {
+		   		common.ajaxError(e)
+		   })
+		   .always(function() {
+			   	layer.closeAll('loading');
+		   });
+		   
+		});
+		$(document).on("click", "#edit-role", function(){
+			var id = $(this).data('id')
+		   var data = {
+		   		groupid:id,
+		   		rolename:$("#edit-rolename").val(),
+		   		description:$('#edit-description').val(),
+		   }
+		   $.ajax({
+			   	url: '{{base_url("admin/GroupManage/edit")}}',
+			   	type: 'POST',
+			   	dataType: 'json',
+			   	timeout:4000,
+			   	data: data,
+			   	beforeSend:function(){
+			   		layer.load(2);
+			   	}
+		   })
+		   .done(function(e) {
+		   		if (e.status!=1) {
+		   			common.ajaxError(e);
+		   			return false;
+		   		}
+		   		layer.closeAll();
+		   		window.location.reload();
+		   		parent.layer.msg(e.message,{
+		   			icon:1
+		   		});
+		   })
+		   .fail(function(e) {
+		   		common.ajaxError(e)
+		   })
+		   .always(function() {
+			   	layer.closeAll('loading');
+		   });
+		   
+		});
+		$(document).on('click','.delete-btn',function(e){
+		 var id = $(this).attr("data-id");
+         layer.confirm('你确定删除此用户组？', {icon: 3, title:'确定删除用户组'}, function(index){
+                $.ajax({
+                    type:"POST",
+                    url:"{{base_url('admin/GroupManage/del')}}",
+                    data:{id:id},
+                    dataType:"json",
+                    success:function(data){
+                        if(data.status=='1'){
+                            layer.msg(data.message,{icon: 1});
+                            window.location.reload(true);
+                            layer.close(index);
+                        }else{
+                            layer.msg(data.message,{icon: 2});
+                        }
+                    }
+                })
+             })	
+     	})	
+    	$(document).on('click','.status-btn',function(e){
+    		var $this = $(this);
+    		var id = $(this).attr("data-id");
+    		var index = $(this).parent().index()-2
+    		if(id==""||id==null)return false;
+    		$.ajax({
+    			url: '{{base_url("admin/GroupManage/isEnable")}}',
+    			type: 'POST',
+    			dataType: 'json',
+    			data: {'rid': id},
+    			timeout:4000,
+			   	beforeSend:function(){
+			   		$this.loading();
+			   	}
+    		})
+    		.done(function(e) {
+		   		if (e.status!=1) {
+		   			common.ajaxError(e);
+		   			return false;
+		   		}
+		   		$this.loaded();
+		   		layer.closeAll();
+		   		$this.parent().parent().find('td').eq(index).html('<span for="" class="label label-'+{"1":"primary","0":"danger"}[e.data]+'">'+{"1":"激活","0":"禁用"}[e.data]+'</span>')
+		   		$this.removeClass('btn-danger btn-primary').addClass({"1":"btn-danger","0":"btn-primary"}[e.data])
+		   		$this.attr('title',{"1":"禁用","0":"激活"}[e.data]).html('<i class="fa fa-'+{"1":"times","0":"check"}[e.data]+'"></i>');
+		   		layer.tips(e.message,$this,{
+		   			tips:[4,"#1ab394"]
+		   		})
+
+    		})
+			.fail(function(e) {
+				common.ajaxError(e)
+			})
+			.always(function() {
+			   	layer.closeAll('loading');
+			});
+    	})
+	});
+</script>
+{% endblock %}
